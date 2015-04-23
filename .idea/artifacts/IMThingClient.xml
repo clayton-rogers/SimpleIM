@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="IMThingClient">
+    <output-path>$PROJECT_DIR$/out/artifacts/IMThingClient</output-path>
+    <root id="archive" name="IMThingClient.jar">
+      <element id="module-output" name="IM" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/IMThing/Client/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
