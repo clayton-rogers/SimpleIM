@@ -19,9 +19,11 @@ public class IMServer {
                 while (isRunning) {
                     if (!messages.isEmpty()) {
                         String message = messages.poll();
-                        for (User user : userList) {
+                        Iterator<User> i = userList.iterator();
+                        while (i.hasNext()) {
+                            User user = i.next();
                             if (!user.isConnected()) {
-                                userList.remove(user);
+                                i.remove();
                             } else {
                                 user.sendMessage(message);
                             }
