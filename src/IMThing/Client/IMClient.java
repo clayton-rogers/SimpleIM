@@ -46,21 +46,31 @@ public class IMClient {
         System.out.println("Enter some text to chat (q to quit):");
 
         Thread receivingThread = new Thread(new Runnable() {
+            private String username;
             @Override
             public void run() {
                 while (true) {
                     try {
-                        System.out.println(reader.readLine());
+                        String messageReceived = reader.readLine();
+                        System.out.println();
+                        System.out.println(messageReceived);
+                        printPrompt(username);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }
-        });
+
+            private Runnable init(String username) {
+                this.username = username;
+                return this;
+            }
+        }.init(username));
         receivingThread.start();
 
         for (;;) {
             String words = "";
+            printPrompt(username);
             try {
                 words = console.readLine();
             } catch (IOException e) {
@@ -84,5 +94,9 @@ public class IMClient {
         }
 
         System.exit(0);
+    }
+
+    private static void printPrompt(String username) {
+        System.out.print(username + ": ");
     }
 }

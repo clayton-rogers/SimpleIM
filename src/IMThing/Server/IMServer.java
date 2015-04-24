@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class IMServer {
-    public static Queue<String> messages = new ConcurrentLinkedQueue<>();
+    public static Queue<Message> messages = new ConcurrentLinkedQueue<>();
     private static List<User> userList = new ArrayList<>();
     private static boolean isRunning = true;
 
@@ -17,26 +17,27 @@ public class IMServer {
             @Override
             public void run() {
                 while (isRunning) {
-                    if (!messages.isEmpty()) {
-                        String message = messages.poll();
-                        Iterator<User> i = userList.iterator();
-                        while (i.hasNext()) {
-                            User user = i.next();
-                            if (!user.isConnected()) {
-                                i.remove();
-                            } else {
-                                user.sendMessage(message);
-                            }
-                        }
-                        if (message.contains("kill")) {
-                            isRunning = false;
-                        }
-                    }
-
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+
+                    Message message = messages.poll();
+                    if (message == null) {continue;}
+                    Iterator<User> i = userList.iterator();
+                    while (i.hasNext()) {
+                        User user = i.next();
+                        if (!user.isConnected()) {
+                            i.remove();
+                        } else {
+                            if (!message.getSource().equals(user)) {
+                                user.sendMessage(message.getMessage());
+                            }
+                        }
+                    }
+                    if (message.getMessage().contains("kill")) {
+                        isRunning = false;
                     }
                 }
             }

@@ -39,7 +39,7 @@ public class User {
                         }
                         String message = username + ": " + in;
 //                        System.out.println(message);
-                        IMServer.messages.offer(message);
+                        IMServer.messages.offer(new Message(User.this, message));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
