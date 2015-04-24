@@ -6,13 +6,23 @@ import java.net.*;
 public class IMClient {
     public static void main(String argv[]) {
 
-        System.out.println("Enter your username: ");
+
         BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 
         // Get the username
         String username = "";
+        System.out.println("Enter your username: ");
         try {
             username = console.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Get IP
+        String IP = "";
+        System.out.println("Enter the IP: ");
+        try {
+            IP = console.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -22,8 +32,7 @@ public class IMClient {
         final BufferedReader reader;
         BufferedWriter writer;
         try {
-            //socket = new Socket("99.246.135.80",5555);
-            socket = new Socket("localhost",5555);
+            socket = new Socket(IP,5555);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(username + "\n");
