@@ -9,37 +9,46 @@ public class IMClient {
         System.out.println("Enter your username: ");
         BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
 
+        // Get the username
         String username = "";
         try {
             username = console.readLine();
         } catch (IOException e) {
+            e.printStackTrace();
         }
 
+        // Connect and send the username
         Socket socket;
+        final BufferedReader reader;
+        BufferedWriter writer;
         try {
+            //socket = new Socket("99.246.135.80",5555);
             socket = new Socket("localhost",5555);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            System.out.println("Could not connect.");
-            return;
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Could not connect.");
-            return;
-        }
-
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(username + "\n");
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Could not connect.");
+            return;
         }
 
-        System.out.println("Enter some text to chat:");
+        System.out.println("Enter some text to chat (q to quit):");
+
+        Thread receivingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        System.out.println(reader.readLine());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        receivingThread.start();
 
         for (;;) {
             String words = "";
@@ -64,5 +73,7 @@ public class IMClient {
                 }
             }
         }
+
+        System.exit(0);
     }
 }

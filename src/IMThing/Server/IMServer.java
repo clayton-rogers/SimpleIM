@@ -2,16 +2,47 @@ package IMThing.Server;
 
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class IMServer {
+    public static Queue<String> messages = new ConcurrentLinkedQueue<>();
+    private static List<User> userList = new ArrayList<>();
+    private static boolean isRunning = true;
+
     public static void main(String argv[]) throws Exception {
-        System.out.println(" Server is Running  " );
-        ServerSocket mysocket = new ServerSocket(5555);
+        System.out.println("Server is running" );
+        ServerSocket serverSocket = new ServerSocket(5555);
 
-        List<User> userList = new ArrayList<>();
+        Thread rebroadcastThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning) {
+                    if (!messages.isEmpty()) {
+                        String message = messages.poll();
+                        for (User user : userList) {
+                            if (!user.isConnected()) {
+                                userList.remove(user);
+                            } else {
+                                user.sendMessage(message);
+                            }
+                        }
+                        if (message.contains("kill")) {
+                            isRunning = false;
+                        }
+                    }
 
-        while(true) { 
-            Socket socket = mysocket.accept();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        rebroadcastThread.start();
+
+        while(isRunning) {
+            Socket socket = serverSocket.accept();
             System.out.println("New connection");
             User user = new User(socket);
             userList.add(user);
@@ -19,25 +50,3 @@ public class IMServer {
         }
     }
 }
-//
-//class HandleConnection extends Thread  {
-//    Socket socket;
-//
-//    public HandleConnection(Socket socket) {
-//        this.socket = socket;
-//    }
-//
-//    @Override
-//    public void run() {
-//        try {
-//            BufferedWriter writer =	new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//            for (int i = 0; i < 100000; i++) {
-//                writer.write("Text text text text " + i + "\n");
-//            }
-//            writer.flush();
-//            socket.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//}
