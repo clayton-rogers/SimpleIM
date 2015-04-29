@@ -1,5 +1,7 @@
 package IMThing.Server;
 
+import IMThing.Configuration;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -11,7 +13,6 @@ import java.net.Socket;
  */
 public class User {
     private String username;
-    //private Socket socket;
     private BufferedWriter writer;
     private BufferedReader reader;
     private boolean isConnected = false;
@@ -19,13 +20,26 @@ public class User {
     Thread readThread;
 
     public User (Socket socket) {
-        //this.socket = socket;
+
+        String version = "";
         try {
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             username = reader.readLine().trim();
+            version = reader.readLine().trim();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        if (!version.equals(Configuration.VERSION)) {
+            try {
+                writer.write("Disconnected due to mismatched version number.");
+                writer.write("Server is version: " + Configuration.VERSION + " Client is version: " + version);
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
         }
 
         isConnected = true;
@@ -38,7 +52,6 @@ public class User {
                             break;
                         }
                         String message = username + ": " + in;
-//                        System.out.println(message);
                         IMServer.messages.offer(new Message(User.this, message));
                     } catch (IOException e) {
                         e.printStackTrace();

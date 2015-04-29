@@ -1,5 +1,7 @@
 package IMThing.Client;
 
+import IMThing.Configuration;
+
 import java.io.*;
 import java.net.*;
 
@@ -36,6 +38,8 @@ public class IMClient {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(username + "\n");
+            writer.write(Configuration.VERSION + "\n");
+            // TODO add a version string here, to prevent mismatched client and server
             writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
