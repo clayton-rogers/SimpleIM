@@ -10,9 +10,15 @@ import java.io.IOException;
  * Created by Clayton on 25/04/2015.
  */
 public class Configuration {
+    /** The protocol version for the handshake */
     public static final String PROTOCOL_VERSION = "1.4";
+    /** The default port number to use. */
     public static final int PORT_NUMBER = 60055;
 
+    /**
+     * HandshakeException is thrown whenever there is an issue with the handshake.
+     * This is generally due to mismatched versions between the server and the client.
+     */
     public static class HandshakeException extends Exception {
         public HandshakeException(Throwable cause) {
             super(cause);
@@ -26,7 +32,8 @@ public class Configuration {
      * Sends the handshake to the server.
      *
      * @param writer The socket to write to.
-     * @param username The username of the new user.
+     * @param username The username to register with the server.
+     * @throws HandshakeException When there is an issue completing the handshake.
      */
     public static void sendHandshake (BufferedWriter writer, String username) throws HandshakeException {
         try {
@@ -43,6 +50,7 @@ public class Configuration {
      *
      * @param reader The socket to read from.
      * @return The username of the new user.
+     * @throws HandshakeException When there is an issue completing the handshake.
      */
     public static String receiveHandshake (BufferedReader reader) throws HandshakeException{
         String username;

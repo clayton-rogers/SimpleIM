@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * Represents the connection with the server. Allow the receipt and sending of messages.
  *
  * Created by Clayton on 09/05/2015.
  */
@@ -15,6 +16,9 @@ public class Connection {
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
+
+    /** The list of messages that have been received on the socket, but have yet to be added to
+     *  the GUI. */
     public BlockingQueue<String> newMessages = new LinkedBlockingQueue<>();
 
     private boolean isConnected = true;
@@ -39,7 +43,8 @@ public class Connection {
             isConnected = false;
         }
 
-        final Thread readThread;
+        // This thread constantly checks for new messages on the socket.
+        Thread readThread;
         if (isConnected) {
             readThread = new Thread(new Runnable() {
                 @Override
@@ -59,11 +64,15 @@ public class Connection {
                     isConnected = false;
                 }
             });
-
             readThread.start();
         }
     }
 
+    /**
+     * Allows the owner of the connection to send a message to the server.
+     *
+     * @param message The message to be sent.
+     */
     public void sendMessage(String message) {
         if (isConnected()) {
             try {
@@ -75,8 +84,15 @@ public class Connection {
         }
     }
 
+    /**
+     * Returns whether the connection is connected.
+     *
+     * @return True when the connection is connected.
+     */
     public boolean isConnected() {
-        isConnected = socket.isConnected();
+        if (isConnected) {
+            isConnected = socket.isConnected();
+        }
         return isConnected;
     }
 }
