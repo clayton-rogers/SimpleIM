@@ -1,5 +1,7 @@
 package IMThing.Server;
 
+import IMThing.Configuration;
+
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -11,7 +13,7 @@ public class IMServer {
 
     public static void main(String argv[]) throws Exception {
         System.out.println("Server is running" );
-        ServerSocket serverSocket = new ServerSocket(5555);
+        ServerSocket serverSocket = new ServerSocket(Configuration.PORT_NUMBER);
 
         Thread rebroadcastThread = new Thread(new Runnable() {
             @Override

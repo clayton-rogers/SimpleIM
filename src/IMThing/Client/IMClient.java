@@ -34,7 +34,7 @@ public class IMClient {
         final BufferedReader reader;
         BufferedWriter writer;
         try {
-            socket = new Socket(IP,5555);
+            socket = new Socket(IP,Configuration.PORT_NUMBER);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(username + "\n");
