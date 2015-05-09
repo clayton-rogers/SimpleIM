@@ -31,10 +31,10 @@ public class User {
             e.printStackTrace();
         }
 
-        if (!version.equals(Configuration.VERSION)) {
+        if (!version.equals(Configuration.PROTOCOL_VERSION)) {
             try {
                 writer.write("Disconnected due to mismatched version number.");
-                writer.write("Server is version: " + Configuration.VERSION + " Client is version: " + version);
+                writer.write("Server is version: " + Configuration.PROTOCOL_VERSION + " Client is version: " + version);
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();

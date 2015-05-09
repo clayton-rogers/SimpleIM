@@ -38,7 +38,7 @@ public class IMClient {
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(username + "\n");
-            writer.write(Configuration.VERSION + "\n");
+            writer.write(Configuration.PROTOCOL_VERSION + "\n");
             // TODO add a version string here, to prevent mismatched client and server
             writer.flush();
         } catch (IOException e) {
