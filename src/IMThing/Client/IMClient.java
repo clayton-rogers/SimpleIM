@@ -1,106 +1,89 @@
 package IMThing.Client;
 
-import IMThing.Configuration;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.concurrent.TimeUnit;
 
-import java.io.*;
-import java.net.*;
+public class IMClient extends JFrame implements ActionListener {
 
-public class IMClient {
-    public static void main(String argv[]) {
+    private JButton sendButton = new JButton("Send");
+    private JTextArea messageArea = new JTextArea("Welcome to IMClient!\n");
+    private JTextField messageBar = new JTextField();
+    private Connection connection;
+
+    private static String username = JOptionPane.showInputDialog("Enter username:");
+    private static String hostname = JOptionPane.showInputDialog("Enter server IP:");
+
+    public IMClient(final Connection connection) {
+        // *** Set up all the GUI stuff *** //
+        messageArea.setEditable(false);
+        messageBar.addActionListener(this);
+        sendButton.addActionListener(this);
+
+        Container c = getContentPane();
+        c.setLayout(new BorderLayout(5, 5));
+
+        JPanel bottomPane = new JPanel();
+        bottomPane.setLayout(new BoxLayout(bottomPane, BoxLayout.X_AXIS));
+
+        bottomPane.add(messageBar);
+        bottomPane.add(sendButton);
+
+        c.add(messageArea, BorderLayout.CENTER);
+        c.add(bottomPane, BorderLayout.PAGE_END);
 
 
-        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+        // Add a listener for the close button
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        // Get the username
-        String username = "";
-        System.out.println("Enter your username: ");
-        try {
-            username = console.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
+        setSize(500, 500);
+        setVisible(true);
+
+
+        // *** Set up other stuff *** //
+        this.connection = connection;
+        if (connection.isConnected()) {
+            messageArea.append("You are connected!\n\n");
+        } else {
+            messageArea.append("Could not connect!\n\n");
         }
 
-        // Get IP
-        String IP = "";
-        System.out.println("Enter the IP: ");
-        try {
-            IP = console.readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Connect and send the username
-        Socket socket;
-        final BufferedReader reader;
-        BufferedWriter writer;
-        try {
-            socket = new Socket(IP,Configuration.PORT_NUMBER);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            writer.write(username + "\n");
-            writer.write(Configuration.PROTOCOL_VERSION + "\n");
-            // TODO add a version string here, to prevent mismatched client and server
-            writer.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Could not connect.");
-            return;
-        }
-
-        System.out.println("Enter some text to chat (q to quit):");
-
-        Thread receivingThread = new Thread(new Runnable() {
-            private String username;
+        Thread messageReader = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
+                System.out.println("Started message reader thread.");
+                while (connection.isConnected()) {
                     try {
-                        String messageReceived = reader.readLine();
-                        System.out.println();
-                        System.out.println(messageReceived);
-                        printPrompt(username);
-                    } catch (IOException e) {
+                        String message = connection.newMessages.poll(100, TimeUnit.SECONDS);
+                        messageArea.append(message + "\n");
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
+        });
+        messageReader.start();
 
-            private Runnable init(String username) {
-                this.username = username;
-                return this;
-            }
-        }.init(username));
-        receivingThread.start();
-
-        for (;;) {
-            String words = "";
-            printPrompt(username);
-            try {
-                words = console.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (words.equals("q")) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                break;
-            } else {
-                try {
-                    writer.write(words + "\n");
-                    writer.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        System.exit(0);
+        messageBar.requestFocus();
     }
 
-    private static void printPrompt(String username) {
-        System.out.print(username + ": ");
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == messageBar || e.getSource() == sendButton) {
+            if (!messageBar.getText().equals("")) {
+                String text = username + ": " + messageBar.getText();
+                connection.sendMessage(text);
+                messageBar.setText("");
+            }
+        }
+    }
+
+    public static void main(String argv[]) {
+        new IMClient(new Connection(hostname, username));
     }
 }
