@@ -23,7 +23,7 @@ public class IMServer {
     private static boolean isRunning = true;
 
     public static void main(String argv[]) throws Exception {
-        System.out.println("Server is running" );
+        System.out.println("Server is running");
         ServerSocket serverSocket = new ServerSocket(Configuration.PORT_NUMBER);
 
         // This thread waits for there to be a message in the queue, then sends it
@@ -44,8 +44,9 @@ public class IMServer {
                             user.sendMessage(message);
                         }
                     }
-                    if (message.equals("kill")) {
+                    if (message.contains("/kill")) {
                         isRunning = false;
+                        System.exit(0);
                     }
                 }
             }
