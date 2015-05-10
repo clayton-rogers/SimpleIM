@@ -1,6 +1,7 @@
 package IMThing.Client;
 
 import IMThing.Configuration;
+import IMThing.Configuration.HandshakeException;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,14 +13,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * Created by Clayton on 09/05/2015.
  */
-public class Connection {
+class Connection {
     private Socket socket;
     private BufferedReader reader;
     private BufferedWriter writer;
 
     /** The list of messages that have been received on the socket, but have yet to be added to
      *  the GUI. */
-    public BlockingQueue<String> newMessages = new LinkedBlockingQueue<>();
+    public final BlockingQueue<String> newMessages = new LinkedBlockingQueue<>();
 
     private boolean isConnected = true;
 
@@ -29,7 +30,7 @@ public class Connection {
      * @param IP The host of the IM server.
      * @param username The username to connect with.
      */
-    public Connection(String IP, String username) {
+    Connection(String IP, String username) {
 
         // Connect and send the username
         try {
@@ -38,15 +39,14 @@ public class Connection {
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
             Configuration.sendHandshake(writer, username);
-        } catch (IOException | Configuration.HandshakeException e) {
+        } catch (IOException | HandshakeException e) {
             e.printStackTrace();
             isConnected = false;
         }
 
         // This thread constantly checks for new messages on the socket.
-        Thread readThread;
         if (isConnected) {
-            readThread = new Thread(new Runnable() {
+            Thread readThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (isConnected()) {

@@ -1,6 +1,7 @@
 package IMThing.Server;
 
 import IMThing.Configuration;
+import IMThing.Configuration.HandshakeException;
 
 import java.io.*;
 import java.net.Socket;
@@ -11,18 +12,18 @@ import java.net.Socket;
  *
  * Created by Clayton on 23/04/2015.
  */
-public class User {
+class User {
     private String username;
     private BufferedWriter writer;
     private BufferedReader reader;
     private boolean isConnected;
-    private Socket socket;
+    private final Socket socket;
 
     /**
      * Creates a new user which can be communicated with on the given socket.
      * @param socket The socket to communicate with this user.
      */
-    public User (Socket socket) {
+    User (Socket socket) {
         this.socket = socket;
         isConnected = true;
 
@@ -30,14 +31,14 @@ public class User {
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             username = Configuration.receiveHandshake(reader);
-        } catch (IOException | Configuration.HandshakeException e) {
+        } catch (IOException | HandshakeException e) {
             e.printStackTrace();
             isConnected = false;
         }
 
-        Thread readThread;
         if (isConnected) {
-            readThread = new Thread(new Runnable() {
+            Thread readThread = new Thread(new Runnable() {
+                @Override
                 public void run() {
                     while (isConnected()) {
                         try {

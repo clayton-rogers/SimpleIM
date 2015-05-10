@@ -2,6 +2,7 @@ package IMThing.Server;
 
 import IMThing.Configuration;
 
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -14,17 +15,26 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by Clayton on 23/04/2015.
  */
-public class IMServer {
+final class IMServer {
     /** The queue of messages that need to be sent out to all the clients. */
     public static final BlockingQueue<String> messages = new LinkedBlockingQueue<>();
     /** The list of users currently connected to the server. */
-    private static final List<User> userList = new ArrayList<>();
+    private static final Collection<User> userList = new ArrayList<>();
     /** True when the server is running. Used to stop the server. */
     private static boolean isRunning = true;
 
-    public static void main(String argv[]) throws Exception {
+    private IMServer() {
+    }
+
+    public static void main(String[] argv) {
         System.out.println("Server is running");
-        ServerSocket serverSocket = new ServerSocket(Configuration.PORT_NUMBER);
+        ServerSocket serverSocket;
+        try {
+            serverSocket = new ServerSocket(Configuration.PORT_NUMBER);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
         // This thread waits for there to be a message in the queue, then sends it
         // to all the connected users.
@@ -34,7 +44,7 @@ public class IMServer {
                 while (isRunning) {
                     String message = null;
                     try {
-                        message = messages.poll(100, TimeUnit.SECONDS);
+                        message = messages.poll(100L, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -46,7 +56,7 @@ public class IMServer {
                     }
                     if (message.contains("/kill")) {
                         isRunning = false;
-                        System.exit(0);
+                        //System.exit(0);
                     }
                 }
             }
@@ -60,7 +70,7 @@ public class IMServer {
             public void run() {
                 while (isRunning) {
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(100L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -83,7 +93,14 @@ public class IMServer {
 
         // Finally the main thread just sits around waiting for clients to connect.
         while(isRunning) {
-            Socket socket = serverSocket.accept();
+            Socket socket;
+            try {
+                socket = serverSocket.accept();
+            } catch (IOException e) {
+                e.printStackTrace();
+                isRunning = false;
+                continue;
+            }
 
             User user = new User(socket);
             userList.add(user);

@@ -11,17 +11,15 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by Clayton on 09/05/2015.
  */
-public class IMClient extends JFrame implements ActionListener {
+final class IMClient extends JFrame implements ActionListener {
 
-    private JButton sendButton = new JButton("Send");
-    private JTextArea messageArea = new JTextArea("Welcome to IMClient!\n");
-    private JTextField messageBar = new JTextField();
-    private Connection connection;
+    private final JButton sendButton = new JButton("Send");
+    private final JTextArea messageArea = new JTextArea("Welcome to IMClient!\n");
+    private final JTextField messageBar = new JTextField();
+    private final Connection connection;
+    private final String username;
 
-    private static String username = JOptionPane.showInputDialog("Enter username:");
-    private static String hostname = JOptionPane.showInputDialog("Enter server IP:");
-
-    public IMClient(final Connection connection) {
+    private IMClient(String hostname, String username) {
         // *** Set up all the GUI stuff *** //
         messageArea.setEditable(false);
         messageBar.addActionListener(this);
@@ -48,7 +46,8 @@ public class IMClient extends JFrame implements ActionListener {
 
 
         // *** Set up other stuff *** //
-        this.connection = connection;
+        this.username = username;
+        connection = new Connection(hostname, username);
         if (connection.isConnected()) {
             messageArea.append("You are connected!\n\n");
         } else {
@@ -63,7 +62,7 @@ public class IMClient extends JFrame implements ActionListener {
                 System.out.println("Started message reader thread.");
                 while (connection.isConnected()) {
                     try {
-                        String message = connection.newMessages.poll(100, TimeUnit.SECONDS);
+                        String message = connection.newMessages.poll(100L, TimeUnit.SECONDS);
                         messageArea.append(message + "\n");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -83,7 +82,7 @@ public class IMClient extends JFrame implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == messageBar || e.getSource() == sendButton) {
+        if (e.getSource().equals(messageBar) || e.getSource().equals(sendButton)) {
             if (!messageBar.getText().equals("")) {
                 String text = username + ": " + messageBar.getText();
                 connection.sendMessage(text);
@@ -96,7 +95,9 @@ public class IMClient extends JFrame implements ActionListener {
      * Start the program.
      * @param argv The arguments.
      */
-    public static void main(String argv[]) {
-        new IMClient(new Connection(hostname, username));
+    public static void main(String[] argv) {
+        String username = JOptionPane.showInputDialog("Enter username:");
+        String hostname = JOptionPane.showInputDialog("Enter server IP:");
+        new IMClient(hostname, username);
     }
 }

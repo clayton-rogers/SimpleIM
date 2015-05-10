@@ -9,11 +9,14 @@ import java.io.IOException;
  *
  * Created by Clayton on 25/04/2015.
  */
-public class Configuration {
+public final class Configuration {
     /** The protocol version for the handshake */
-    public static final String PROTOCOL_VERSION = "1.4";
+    private static final String PROTOCOL_VERSION = "1.4";
     /** The default port number to use. */
     public static final int PORT_NUMBER = 60055;
+
+    private Configuration() {
+    }
 
     /**
      * HandshakeException is thrown whenever there is an issue with the handshake.
@@ -23,9 +26,7 @@ public class Configuration {
         public HandshakeException(Throwable cause) {
             super(cause);
         }
-        public HandshakeException() {
-            super();
-        }
+        public HandshakeException() {}
     }
 
     /**
