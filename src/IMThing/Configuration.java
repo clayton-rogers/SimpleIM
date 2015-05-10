@@ -11,7 +11,7 @@ import java.io.IOException;
  */
 public final class Configuration {
     /** The protocol version for the handshake */
-    private static final String PROTOCOL_VERSION = "1.4";
+    private static final String PROTOCOL_VERSION = "1.5";
     /** The default port number to use. */
     public static final int PORT_NUMBER = 60055;
 
